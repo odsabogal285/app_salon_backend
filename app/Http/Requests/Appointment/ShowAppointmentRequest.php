@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Service;
+namespace App\Http\Requests\Appointment;
 
-use App\Models\Service;
+use App\Models\Appointment;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class ShowServiceRequest extends FormRequest
+class ShowAppointmentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,9 +25,10 @@ class ShowServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-
+            //
         ];
     }
+
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
@@ -40,9 +41,9 @@ class ShowServiceRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $service = Service::find($this->route('service'));
-            if (!$service) {
-                $validator->errors()->add('service', 'Servicio no encontrado');
+            $appointment = Appointment::find($this->route('appointment'));
+            if (!$appointment) {
+                $validator->errors()->add('service', 'Cita no encontrada');
             }
         });
     }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Appointment\IndexAppointmentRequest;
+use App\Http\Requests\Appointment\ShowAppointmentRequest;
 use App\Http\Requests\Appointment\StoreAppointmentRequest;
 use App\Models\Appointment;
 use Exception;
@@ -14,9 +16,30 @@ class AppointmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(IndexAppointmentRequest $request)
     {
-        //
+        try {
+
+            $appointments  = Appointment::query()
+                ->select('id','time')
+                ->where('date', $request->input('date'))
+                ->get();
+
+            return response()->json([
+                'response' => 'success',
+                'data' => [
+                    'appointments' => $appointments
+                ],
+                'error' => null
+            ]);
+
+        } catch (Exception $exception) {
+            return response()->json([
+                'response' => 'error',
+                'data' => null,
+                'error' => $exception->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -49,9 +72,13 @@ class AppointmentController extends Controller
 
             return response()->json([
                 'response' => 'success',
-                'data' => $appointment,
+                'data' =>  [
+                    'appointment' => $appointment,
+                    'message' => 'Reservación creada con éxito'
+                ],
                 'error' => null
             ]);
+
         } catch (Exception $exception) {
             DB::rollBack();
             return response()->json([
@@ -65,9 +92,30 @@ class AppointmentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Appointment $appointment)
+    public function show(ShowAppointmentRequest $appointment)
     {
-        //
+        try {
+
+            $appointment_query = Appointment::query()
+                ->with('services')
+                ->first('id', $appointment->id);
+
+            return response()->json([
+             'response' => 'success',
+             'data' => [
+                 '$appointment' => $appointment_query,
+                 'message' => ''
+             ],
+             'error' => null
+            ]);
+
+        } catch (Exception $exception) {
+            return response()->json([
+                'response' => 'error',
+                'data' => null,
+                'error' => $exception->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -92,5 +140,20 @@ class AppointmentController extends Controller
     public function destroy(Appointment $appointment)
     {
         //
+    }
+
+    public function getAppointmentsByDates (Request $request)
+    {
+        try {
+
+            dd($request);
+
+        } catch (Exception $exception) {
+            return response()->json([
+                'response' => 'error',
+                'data' => null,
+                'error' => $exception->getMessage()
+            ], 500);
+        }
     }
 }
