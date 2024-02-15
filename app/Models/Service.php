@@ -11,4 +11,9 @@ class Service extends BaseModel
     use HasFactory;
 
     protected $fillable = ['name', 'price'];
+
+    public function appointments ()
+    {
+        return $this->belongsToMany(Appointment::class, 'appointment_services');
+    }
 }

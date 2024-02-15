@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ServiceController;
 use Illuminate\Http\Request;
@@ -29,6 +30,7 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
     Route::get('/me', [LoginController::class, 'me']);
     Route::post('/logout', [LoginController::class, 'logout']);
     Route::resource('/services', ServiceController::class);
+    Route::resource('/appointments', AppointmentController::class);
 });
 
 

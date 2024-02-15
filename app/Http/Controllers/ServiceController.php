@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\DestroyServiceRequest;
-use App\Http\Requests\ShowServiceRequest;
-use App\Http\Requests\StoreServiceRequest;
-use App\Http\Requests\UpdateServiceRequest;
+use App\Http\Requests\Service\DestroyServiceRequest;
+use App\Http\Requests\Service\ShowServiceRequest;
+use App\Http\Requests\Service\StoreServiceRequest;
+use App\Http\Requests\Service\UpdateServiceRequest;
 use App\Models\Service;
 use Exception;
-use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {

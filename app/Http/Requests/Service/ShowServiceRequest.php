@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Service;
 
 use App\Models\Service;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class DestroyServiceRequest extends FormRequest
+class ShowServiceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,10 +25,9 @@ class DestroyServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+
         ];
     }
-
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
