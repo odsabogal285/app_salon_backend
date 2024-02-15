@@ -27,6 +27,14 @@ class Appointment extends BaseModel
         );
     }
 
+    protected function time(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) =>  Carbon::create($value)->format('H:i'),
+            // set: fn (string $value) => strtolower($value),
+        );
+    }
+
     public function user ()
     {
         return $this->belongsTo(User::class);
