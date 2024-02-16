@@ -141,12 +141,22 @@ class AppointmentController extends Controller
     {
         //
     }
-
-    public function getAppointmentsByDates (Request $request)
+    public function getAppointmentsByUser (Request $request)
     {
         try {
 
-            dd($request);
+            $appointments = Auth::user()->appointments()->select('id', 'date','time', 'total_amount')->with(['services' => function ($query) {
+                $query->select('id', 'name', 'price');
+            }])->orderBy('date', 'asc')->get();
+
+            return response()->json([
+                'response' => 'success',
+                'data' => [
+                    'appointment' => $appointments,
+                    'message' => ''
+                ],
+                'error' => null
+            ]);
 
         } catch (Exception $exception) {
             return response()->json([

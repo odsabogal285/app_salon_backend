@@ -31,6 +31,7 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
     Route::post('/logout', [LoginController::class, 'logout']);
     Route::resource('/services', ServiceController::class);
     Route::resource('/appointments', AppointmentController::class);
+    Route::get('/appointments-user', [AppointmentController::class, 'getAppointmentsByUser']);
 });
 
 
