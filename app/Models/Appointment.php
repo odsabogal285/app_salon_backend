@@ -22,7 +22,7 @@ class Appointment extends BaseModel
     {
         return new Attribute(
             get: function ($value, $attributes) {
-                return Carbon::create($this->date)->format('d-m-Y');
+                return Carbon::create($this->date)->format('d/m/Y');
             }
         );
     }

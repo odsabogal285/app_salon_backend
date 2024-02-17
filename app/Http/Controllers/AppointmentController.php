@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Appointment\EditAppointmentRequest;
 use App\Http\Requests\Appointment\IndexAppointmentRequest;
 use App\Http\Requests\Appointment\ShowAppointmentRequest;
 use App\Http\Requests\Appointment\StoreAppointmentRequest;
@@ -103,7 +104,7 @@ class AppointmentController extends Controller
             return response()->json([
              'response' => 'success',
              'data' => [
-                 '$appointment' => $appointment_query,
+                 'appointment' => $appointment_query,
                  'message' => ''
              ],
              'error' => null
@@ -121,17 +122,86 @@ class AppointmentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Appointment $appointment)
+    public function edit(EditAppointmentRequest $request, $id)
     {
-        //
+        try {
+
+            $appointment = Appointment::query()->where('id', $id)
+                                ->where('user_id', Auth::user()->id)
+                                ->with(['services' => function ($query) {
+                                    $query->select('id', 'name', 'price');
+                                }])
+                                ->first();
+
+            $appointment->services->map(function ($service) {
+                unset($service->pivot);
+                return $service;
+            });
+
+            if (!$appointment) {
+                return response()->json([
+                    'response' => 'error',
+                    'data' => null,
+                    'error' => 'Cita no encontrada'
+                ], 404);
+            }
+
+            return response()->json([
+                'response' => 'success',
+                'data' => [
+                    'appointment' => $appointment,
+                    'message' => ''
+                ],
+                'error' => null
+            ]);
+
+        } catch (Exception $exception) {
+            return response()->json([
+                'response' => 'error',
+                'data' => null,
+                'error' => $exception->getMessage()
+            ], 500);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Appointment $appointment)
+    public function update(Request $request, $id)
     {
-        //
+
+        try {
+
+            DB::beginTransaction();
+
+            $appointment = Appointment::query()->find($id);
+
+            $appointment->update([
+                'date' => $request->input('date')??$appointment->name,
+                'time' => $request->input('time')??$appointment->price,
+                'total_amount' => $request->input('total_amount')??$appointment->total_amount
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'response' => 'success',
+                'data' => [
+                    'appointment' => $appointment,
+                    'message' => 'Cita actualizada correctamente'
+                ],
+                'error' => null
+            ]);
+
+        } catch (Exception $exception) {
+            DB::rollBack();
+            return response()->json([
+                'response' => 'error',
+                'data' => null,
+                'error' => $exception->getMessage()
+            ], 500);
+
+        }
     }
 
     /**
