@@ -245,9 +245,18 @@ class AppointmentController extends Controller
     {
         try {
 
-            $appointments = Auth::user()->appointments()->select('id', 'date','time', 'total_amount')->with(['services' => function ($query) {
-                $query->select('id', 'name', 'price');
-            }])->orderBy('date', 'asc')->get();
+            if(Auth::user()->admin){
+                $appointments = Appointment::query()->select('id', 'date','time', 'total_amount', 'user_id')->with(['services' => function ($query) {
+                    $query->select('id', 'name', 'price');
+                }, 'user' => function ($query) {
+                    $query->select('id','name', 'email');
+                }])->orderBy('date', 'asc')->get();
+            } else {
+                $appointments = Auth::user()->appointments()->select('id', 'date','time', 'total_amount')->with(['services' => function ($query) {
+                    $query->select('id', 'name', 'price');
+                }])->orderBy('date', 'asc')->get();
+            }
+
 
             return response()->json([
                 'response' => 'success',

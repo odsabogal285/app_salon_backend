@@ -124,8 +124,35 @@ class LoginController extends Controller
 
     public function me()
     {
-        $user = Auth::user()->select('name', 'email')->first();
+        $user = User::query()->select('name', 'email', 'admin')->find(Auth::user()->id);
         try {
+            return response()->json([
+                'response' => 'success',
+                'data' => [
+                    'user' => $user,
+                ],
+                'error' => null
+            ]);
+        } catch (Exception $exception) {
+            return response()->json([
+                'response' => 'error',
+                'data' => null,
+                'error' => $exception->getMessage()
+            ], 500);
+        }
+    }
+
+    public function admin()
+    {
+        try {
+            $user = User::query()->select('name', 'email', 'admin')->find(Auth::user()->id);
+            if (!$user->admin) {
+                return response()->json([
+                    'response' => 'error',
+                    'data' => null,
+                    'error' => 'Acción no válida'
+                ], 403);
+            }
             return response()->json([
                 'response' => 'success',
                 'data' => [

@@ -31,6 +31,7 @@ Route::group(['prefix' => 'v1'], function () {
 
 Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
     Route::get('/me', [LoginController::class, 'me']);
+    Route::get('/admin', [LoginController::class, 'admin']);
     Route::post('/logout', [LoginController::class, 'logout']);
     Route::resource('/services', ServiceController::class);
     Route::resource('/appointments', AppointmentController::class);
