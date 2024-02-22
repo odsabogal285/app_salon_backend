@@ -23,6 +23,9 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'v1'], function () {
     Route::post('/login', [LoginController::class, 'login']);
     Route::post('/register', [LoginController::class, 'register']);
+    Route::post('/forgot-password', [LoginController::class, 'forgotPassword']);
+    Route::get('/forgot-password/{token}', [LoginController::class, 'verifyPasswordResetToken']);
+    Route::post('/forgot-password/{token}', [LoginController::class, 'updatePassword']);
 });
 
 

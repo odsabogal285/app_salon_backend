@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Appointment\DestroyAppointmentRequest;
 use App\Http\Requests\Appointment\EditAppointmentRequest;
 use App\Http\Requests\Appointment\IndexAppointmentRequest;
 use App\Http\Requests\Appointment\ShowAppointmentRequest;
@@ -207,9 +208,38 @@ class AppointmentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Appointment $appointment)
+    public function destroy(DestroyAppointmentRequest $request, $id)
     {
-        //
+        try {
+
+            DB::beginTransaction();
+
+            $appointment = Appointment::query()->find($id);
+
+            $appointment->services()->detach();
+
+            $appointment->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'response' => 'success',
+                'data' => [
+                    'appointment' => $appointment,
+                    'message' => 'Cita cancelada correctamente'
+                ],
+                'error' => null
+            ]);
+
+        } catch (Exception $exception) {
+            DB::rollBack();
+            return response()->json([
+                'response' => 'error',
+                'data' => null,
+                'error' => $exception->getMessage()
+            ], 500);
+
+        }
     }
     public function getAppointmentsByUser (Request $request)
     {

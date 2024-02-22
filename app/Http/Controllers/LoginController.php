@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -136,5 +140,131 @@ class LoginController extends Controller
                 'error' => $exception->getMessage()
             ], 500);
         }
+    }
+
+    public function forgotPassword (Request $request)
+    {
+        try {
+
+            $user = User::query()->where('email', $request->input('email'))->first();
+
+            if (!$user) {
+                return response()->json([
+                    'response' => 'error',
+                    'data' => null,
+                    'error' => 'Usuario no existe'
+                ], 404);
+            }
+
+            $token = Str::random(64);
+            DB::table('password_reset_tokens')->where(['email' => $request->email])->delete();
+
+            DB::table('password_reset_tokens')->insert([
+                'email' => $request->email,
+                'token' => $token,
+                'created_at' => Carbon::now()
+            ]);
+
+            Mail::send('email.recuperar-contrasenia', ['token' => $token], function ($message) use ($request) {
+                $message->to($request->email);
+                $message->subject('Recuperar Contraseña');
+            });
+
+            return response()->json([
+                'response' => 'success',
+                'data' => [
+                    'message' => 'Email enviado con éxito',
+                ],
+                'error' => null
+            ]);
+
+        } catch (Exception $exception) {
+            return response()->json([
+                'response' => 'error',
+                'data' => null,
+                'error' => $exception->getMessage()
+            ], 500);
+        }
+    }
+
+    public function verifyPasswordResetToken(Request $request, $token)
+    {
+        try {
+
+            $tokenData = DB::table('password_reset_tokens')
+                ->where('token', $token)->first();
+
+            if(!$tokenData) {
+                return response()->json([
+                    'response' => 'error',
+                    'data' => null,
+                    'error' => 'Token no válido'
+                ], 303);
+            }
+
+            return response()->json([
+                'response' => 'success',
+                'data' => 'Token válido',
+                'error' => null
+            ]);
+
+        } catch (Exception $exception) {
+            return response()->json([
+                'response' => 'error',
+                'data' => null,
+                'error' => $exception->getMessage()
+            ], 500);
+        }
+
+    }
+
+    public function updatePassword(Request $request, $token)
+    {
+        try {
+
+            $tokenData = DB::table('password_reset_tokens')
+                ->where('token', $token)->first();
+
+            if(!$tokenData) {
+                return response()->json([
+                    'response' => 'error',
+                    'data' => null,
+                    'error' => 'Token no válido'
+                ], 303);
+            }
+
+            $user = User::query()->where('email', $tokenData->email)->first();
+
+            if(!$user) {
+                return response()->json([
+                    'response' => 'error',
+                    'data' => null,
+                    'error' => 'Token no válido'
+                ], 303);
+            }
+
+            $user->update([
+                'password' => bcrypt($request->input('password'))
+            ]);
+
+            DB::table('password_reset_tokens')
+                ->where('token', $token)->delete();
+
+            return response()->json([
+                'response' => 'success',
+                'data' => [
+                    'message' => 'Password modificado correctamente',
+                ],
+                'error' => null
+            ]);
+
+        } catch (Exception $exception) {
+            return response()->json([
+                'response' => 'error',
+                'data' => null,
+                'error' => $exception->getMessage()
+            ], 500);
+        }
+
     }
 }
